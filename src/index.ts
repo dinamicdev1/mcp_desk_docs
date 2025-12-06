@@ -285,7 +285,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // Build endpoint with optional department filter
       let categoriesEndpoint = "/categories";
       if (departmentId) {
-        categoriesEndpoint += `?departmentId=${departmentId}`;
+        categoriesEndpoint += `?departmentId=${encodeURIComponent(departmentId)}`;
       }
 
       const categoriesData = await makeZohoDeskRequest<CategoriesResult>(
