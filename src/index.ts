@@ -10,8 +10,8 @@ import { z } from "zod";
 
 // Zoho Desk API configuration
 const ZOHO_DESK_API_BASE = process.env.ZOHO_DESK_API_BASE || "https://desk.zoho.com/api/v1";
-const ZOHO_ORG_ID = process.env.ZOHO_ORG_ID || "";
-const ZOHO_ACCESS_TOKEN = process.env.ZOHO_ACCESS_TOKEN || "";
+const ZOHO_ORG_ID = process.env.ZOHO_ORG_ID;
+const ZOHO_ACCESS_TOKEN = process.env.ZOHO_ACCESS_TOKEN;
 
 // Define Zod schemas for validation
 const SearchArticlesSchema = z.object({
@@ -211,7 +211,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // Search articles using Zoho Desk API
       const searchEndpoint = `/articles/search?query=${encodeURIComponent(
         query
-      )}&limit=${limit}`;
+      )}&limit=${encodeURIComponent(limit.toString())}`;
       const searchData = await makeZohoDeskRequest<SearchResult>(searchEndpoint);
 
       if (!searchData || !searchData.data) {
