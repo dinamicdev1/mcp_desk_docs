@@ -1,0 +1,41 @@
+{
+  "name": "@dinamicdev1/mcp-desk-docs",
+  "version": "0.1.0",
+  "description": "MCP server for accessing user manuals and system documentation from Zoho Desk",
+  "license": "MIT",
+  "keywords": [
+    "modelcontextprotocol",
+    "mcp",
+    "mcp-server",
+    "zoho-desk",
+    "documentation"
+  ],
+  "author": "dinamicdev1",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dinamicdev1/mcp_desk_docs.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "mcp-desk-docs": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && chmod +x dist/*.js",
+    "watch": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "^5.7.2"
+  }
+}
