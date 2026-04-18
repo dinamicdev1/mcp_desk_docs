@@ -31,10 +31,10 @@ export class CategoriesService {
 
   /**
    * Obtiene una categoría raíz por su ID
-   * GET /api/v1/kbRootCategories/{categoryId}
+   * GET /api/v1/kbRootCategories/{rootCategoryId}
    */
-  async getRootCategory(categoryId: string): Promise<ZohoDeskFolder> {
-    return this._client.get<ZohoDeskFolder>(`/kbRootCategories/${categoryId}`);
+  async getRootCategory(rootCategoryId: string): Promise<ZohoDeskFolder> {
+    return this._client.get<ZohoDeskFolder>(`/kbRootCategories/${rootCategoryId}`);
   }
 
   /**
@@ -56,9 +56,9 @@ export class CategoriesService {
 
   /**
    * Actualiza una categoría raíz
-   * PATCH /api/v1/kbRootCategories/{categoryId}
+   * PATCH /api/v1/kbRootCategories/{rootCategoryId}
    */
-  async updateRootCategory(categoryId: string, data: UpdateCategoryDTO): Promise<ZohoDeskFolder> {
+  async updateRootCategory(rootCategoryId: string, data: UpdateCategoryDTO): Promise<ZohoDeskFolder> {
     const payload: Record<string, any> = {};
 
     if (data.name) payload.name = data.name;
@@ -66,19 +66,19 @@ export class CategoriesService {
     if (data.displayOrder !== undefined) payload.displayOrder = data.displayOrder;
     if (data.visibility) payload.visibility = data.visibility;
 
-    return this._client.patch<ZohoDeskFolder>(`/kbRootCategories/${categoryId}`, payload);
+    return this._client.patch<ZohoDeskFolder>(`/kbRootCategories/${rootCategoryId}`, payload);
   }
 
   /**
    * Mueve categoría raíz a la papelera
-   * POST /api/v1/kbRootCategories/{categoryId}/moveToTrash
+   * POST /api/v1/kbRootCategories/{rootCategoryId}/moveToTrash
    */
-  async moveRootCategoryToTrash(categoryId: string): Promise<void> {
-    await this._client.post(`/kbRootCategories/${categoryId}/moveToTrash`);
+  async moveRootCategoryToTrash(rootCategoryId: string): Promise<void> {
+    await this._client.post(`/kbRootCategories/${rootCategoryId}/moveToTrash`);
   }
 
   // ============================================
-  // LEGACY ENDPOINTS (para compatibilidad)
+  // CATEGORY TREE
   // ============================================
 
   /**
