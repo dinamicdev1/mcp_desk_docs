@@ -166,7 +166,7 @@ export class ArticlesService {
   }
 
   // ============================================
-  // VERSIONES
+  // HISTORIAL
   // ============================================
 
   /**
@@ -271,6 +271,10 @@ export class ArticlesService {
       { attachmentIds }
     );
   }
+
+  // ============================================
+  // FEEDBACK
+  // ============================================
 
   /**
    * Registra like en una traduccion de articulo.
