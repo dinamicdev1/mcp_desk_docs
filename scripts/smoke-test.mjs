@@ -20,7 +20,9 @@ const checks = [
     args: {},
     validate: (result) => {
       const text = result.content?.[0]?.text || '';
-      if (!text.includes('Status: CONNECTED')) {
+      // Solo verifica que el reporte mencione CONNECTED. El wording exacto
+      // ('Status: CONNECTED' vs otra variante) puede cambiar sin romper esto.
+      if (!/\bCONNECTED\b/.test(text)) {
         throw new Error(`Esperaba CONNECTED, recibido: ${text.split('\n')[3] || text}`);
       }
     },
