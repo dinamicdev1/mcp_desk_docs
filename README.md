@@ -99,7 +99,7 @@ Con `.env` configurado, ejecuta `npm run oauth` para obtener el refresh token v�
 |-------------|-------------|
 | `list_organizations` | Lista las organizaciones accesibles con el token actual |
 
-### Artículos (10)
+### Artículos (18)
 
 | Herramienta | Descripción |
 |-------------|-------------|
@@ -109,31 +109,44 @@ Con `.env` configurado, ejecuta `npm run oauth` para obtener el refresh token v�
 | `create_article` | Crea un nuevo artículo |
 | `update_article` | Actualiza un artículo existente |
 | `delete_article` | Mueve artículo a papelera |
+| `restore_articles_from_trash` | Restaura artículos desde papelera |
+| `delete_articles_permanently` | Elimina artículos permanentemente |
+| `list_trashed_articles` | Lista artículos en papelera |
+| `check_permalink` | Verifica disponibilidad de permalink |
+| `list_article_history` | Lista historial de cambios de un artículo |
+| `get_history_entry` | Obtiene una entrada específica del historial |
 | `list_article_translations` | Lista traducciones de un artículo |
-| `create_article_translation` | Crea traducción |
-| `update_article_translation` | Actualiza traducción |
-| `list_article_attachments` | Lista adjuntos de un artículo |
+| `get_article_translation` | Obtiene una traducción por locale (`article_id` + `locale`) |
+| `create_article_translation` | Crea traducción (`article_id` + `locale` en body) |
+| `update_article_translation` | Actualiza traducción (`article_id` + `locale`) |
+| `move_article_translation_to_trash` | Mueve traducción a papelera (`article_id` + `locale`) |
+| `list_article_translation_attachments` | Lista adjuntos de una traducción (`article_id` + `locale`) |
+| `dissociate_article_attachments` | Quita adjuntos de una traducción (`article_id` + `locale` + `attachment_ids[]`) |
+| `like_article` | Registra like en una traducción (`article_id` + `locale`) |
+| `dislike_article` | Registra dislike en una traducción (`article_id` + `locale`) |
 
-### Categorías (6)
+> **Nota sobre locale:** Las tools `get_article_translation`, `update_article_translation`, `move_article_translation_to_trash`, `list_article_translation_attachments`, `dissociate_article_attachments`, `like_article` y `dislike_article` requieren el parámetro `locale` (ej: `"en"`, `"es"`, `"en-us"`) además de `article_id`. Esto refleja que en la API de Zoho Desk las traducciones se identifican por su locale, no por un ID numérico.
+
+### Categorías Raíz (6)
 
 | Herramienta | Descripción |
 |-------------|-------------|
-| `list_categories` | Lista todas las categorías |
-| `get_category` | Obtiene detalles de categoría |
-| `get_category_tree` | Obtiene árbol jerárquico |
-| `create_category` | Crea nueva categoría |
-| `update_category` | Actualiza categoría |
-| `delete_category` | Elimina categoría |
+| `list_root_categories` | Lista categorías raíz (usa `/kbRootCategories`) |
+| `get_root_category` | Obtiene detalles de una categoría raíz |
+| `create_root_category` | Crea nueva categoría raíz |
+| `update_root_category` | Actualiza categoría raíz |
+| `delete_root_category` | Mueve categoría raíz a papelera |
+| `get_category_tree` | Obtiene árbol completo de una categoría raíz (`root_category_id`) |
 
 ### Secciones (5)
 
 | Herramienta | Descripción |
 |-------------|-------------|
-| `list_sections` | Lista secciones de una categoría |
-| `get_section` | Obtiene detalles de sección |
-| `create_section` | Crea nueva sección |
-| `update_section` | Actualiza sección |
-| `delete_section` | Elimina sección |
+| `list_sections` | Lista secciones de una categoría (`category_id`, no `root_category_id`) |
+| `get_section` | Obtiene detalles de sección (`section_id` únicamente) |
+| `create_section` | Crea nueva sección en una categoría (`category_id`) |
+| `update_section` | Actualiza sección (`section_id` únicamente) |
+| `move_section_to_trash` | Mueve sección a papelera (`section_id` únicamente) |
 
 ### Departamentos (2)
 
@@ -173,8 +186,8 @@ search_articles(search_term="facturación")
 ### Organizar Contenido
 
 ```
-1. list_categories() para ver categorías existentes
-2. create_category(name="Guías de Usuario", locale="es")
+1. list_root_categories() para ver categorías raíz existentes
+2. create_root_category(name="Guías de Usuario")
 3. create_section(name="Inicio", category_id="...")
 4. create_article(title="...", category_id="...", section_id="...")
 ```
