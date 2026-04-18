@@ -56,7 +56,7 @@ export async function resolveOrgId(
 
   const storedId = await getStoredOrgId();
   if (storedId) {
-    api.client.setDefaultOrgId(storedId);
+    api.client.setOrgId(storedId);
     return storedId;
   }
 
