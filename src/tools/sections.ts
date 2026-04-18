@@ -4,7 +4,7 @@ import {
   getSectionSchema,
   createSectionSchema,
   updateSectionSchema,
-  deleteSectionSchema,
+  moveSectionToTrashSchema,
 } from '../utils/schemas.js';
 import { resolveToken, resolveOrgId, toolResult } from './_helpers.js';
 
@@ -16,42 +16,41 @@ export function createSectionTools(api: ZohoDeskAPI) {
     // ============================================
 
     list_sections: {
-      description:
-        'Lista todas las secciones de una categoría. Las secciones son subdivisiones dentro de una categoría para organizar mejor los artículos.',
+      description: 'Lista las secciones de una categoria.',
       parameters: listSectionsSchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
         await resolveOrgId(api, args.org_id);
-        const sections = await api.sections.listSections(args.root_category_id, args.category_id, {
+
+        const sections = await api.sections.listSections(args.category_id, {
           from: args.from,
           limit: args.limit,
+          isTrashed: args.is_trashed,
         });
         return toolResult(sections);
       },
     },
 
     get_section: {
-      description: 'Obtiene los detalles de una sección específica.',
+      description: 'Obtiene una seccion por su ID.',
       parameters: getSectionSchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
         await resolveOrgId(api, args.org_id);
-        const section = await api.sections.getSection(
-          args.root_category_id,
-          args.category_id,
-          args.section_id
-        );
+
+        const section = await api.sections.getSection(args.section_id);
         return toolResult(section);
       },
     },
 
     create_section: {
-      description: 'Crea una nueva sección dentro de una categoría.',
+      description: 'Crea una nueva seccion dentro de una categoria.',
       parameters: createSectionSchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
         await resolveOrgId(api, args.org_id);
-        const section = await api.sections.createSection(args.root_category_id, args.category_id, {
+
+        const section = await api.sections.createSection(args.category_id, {
           name: args.name,
           description: args.description,
           displayOrder: args.display_order,
@@ -62,85 +61,35 @@ export function createSectionTools(api: ZohoDeskAPI) {
     },
 
     update_section: {
-      description: 'Actualiza una sección existente. Solo se modifican los campos proporcionados.',
+      description: 'Actualiza una seccion existente.',
       parameters: updateSectionSchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
         await resolveOrgId(api, args.org_id);
-        const section = await api.sections.updateSection(
-          args.root_category_id,
-          args.category_id,
-          args.section_id,
-          {
-            name: args.name,
-            description: args.description,
-            displayOrder: args.display_order,
-            visibility: args.visibility,
-          }
-        );
+
+        const section = await api.sections.updateSection(args.section_id, {
+          name: args.name,
+          description: args.description,
+          displayOrder: args.display_order,
+          visibility: args.visibility,
+        });
         return toolResult(section);
       },
     },
 
     // ============================================
-    // PAPELERA Y ELIMINACIÓN
+    // PAPELERA
     // ============================================
 
     move_section_to_trash: {
-      description: 'Mueve una sección a la papelera.',
-      parameters: deleteSectionSchema,
+      description: 'Mueve una seccion a la papelera.',
+      parameters: moveSectionToTrashSchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
         await resolveOrgId(api, args.org_id);
-        await api.sections.moveSectionToTrash(args.root_category_id, args.category_id, args.section_id);
-        return {
-          content: [{ type: 'text' as const, text: `✅ Section ${args.section_id} moved to trash.` }],
-        };
-      },
-    },
 
-    restore_section: {
-      description: 'Restaura una sección de la papelera.',
-      parameters: deleteSectionSchema,
-      execute: async (args: any) => {
-        await resolveToken(api, args.refresh_token);
-        await resolveOrgId(api, args.org_id);
-        await api.sections.restoreSection(args.root_category_id, args.category_id, args.section_id);
-        return {
-          content: [{ type: 'text' as const, text: `✅ Section ${args.section_id} restored from trash.` }],
-        };
-      },
-    },
-
-    delete_section: {
-      description:
-        'Elimina permanentemente una sección. ADVERTENCIA: Los artículos de esta sección serán movidos a la categoría padre.',
-      parameters: deleteSectionSchema,
-      execute: async (args: any) => {
-        await resolveToken(api, args.refresh_token);
-        await resolveOrgId(api, args.org_id);
-        await api.sections.deleteSection(args.root_category_id, args.category_id, args.section_id);
-        return {
-          content: [{ type: 'text' as const, text: `✅ Section ${args.section_id} permanently deleted.` }],
-        };
-      },
-    },
-
-    // ============================================
-    // SECCIONES EN PAPELERA
-    // ============================================
-
-    list_trashed_sections: {
-      description: 'Lista secciones que están en la papelera.',
-      parameters: listSectionsSchema,
-      execute: async (args: any) => {
-        await resolveToken(api, args.refresh_token);
-        await resolveOrgId(api, args.org_id);
-        const sections = await api.sections.listTrashedSections(args.root_category_id, args.category_id, {
-          from: args.from,
-          limit: args.limit,
-        });
-        return toolResult(sections);
+        await api.sections.moveSectionToTrash(args.section_id);
+        return toolResult({ success: true, message: 'Section moved to trash' });
       },
     },
   };
