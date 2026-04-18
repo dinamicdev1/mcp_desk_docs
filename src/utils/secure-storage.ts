@@ -4,6 +4,10 @@ import os from 'os';
 
 const APP_NAME = 'mcp_desk_docs';
 
+// Serializa escrituras de saveConfig para evitar perdidas por read-modify-write
+// concurrente (ej. setRefreshToken + setOrgId disparados casi en paralelo).
+let writeQueue: Promise<void> = Promise.resolve();
+
 export interface SecureConfig {
   clientId: string;
   clientSecret: string;
@@ -48,34 +52,49 @@ async function ensureConfigDir(): Promise<void> {
 }
 
 export async function saveConfig(data: Partial<SecureConfig>): Promise<void> {
-  await ensureConfigDir();
-  const configPath = getConfigFilePath();
+  const previous = writeQueue;
+  let release!: () => void;
+  writeQueue = new Promise<void>((resolve) => { release = resolve; });
 
-  const existing = await loadConfig();
-  const merged: SecureConfig = {
-    clientId: data.clientId || existing?.clientId || '',
-    clientSecret: data.clientSecret || existing?.clientSecret || '',
-    region: data.region || existing?.region || 'com',
-    oauthScopes: data.oauthScopes || existing?.oauthScopes,
-    refreshToken: data.refreshToken !== undefined ? data.refreshToken : existing?.refreshToken,
-    orgId: data.orgId !== undefined ? data.orgId : existing?.orgId,
-    defaultDepartmentId: data.defaultDepartmentId !== undefined ? data.defaultDepartmentId : existing?.defaultDepartmentId,
-    configuredAt: existing?.configuredAt || new Date().toISOString(),
-    lastTokenRefresh: data.refreshToken ? new Date().toISOString() : existing?.lastTokenRefresh,
-  };
+  try {
+    await previous.catch(() => {}); // No bloquear por fallos previos
 
-  const jsonContent = JSON.stringify(merged, null, 2);
-  await fs.writeFile(configPath, jsonContent, 'utf-8');
+    await ensureConfigDir();
+    const configPath = getConfigFilePath();
 
-  if (process.platform !== 'win32') {
-    try {
-      await fs.chmod(configPath, 0o600);
-    } catch {
-      // Ignorar errores de permisos
+    const existing = await loadConfig();
+    const merged: SecureConfig = {
+      clientId: data.clientId || existing?.clientId || '',
+      clientSecret: data.clientSecret || existing?.clientSecret || '',
+      region: data.region || existing?.region || 'com',
+      oauthScopes: data.oauthScopes || existing?.oauthScopes,
+      refreshToken: data.refreshToken !== undefined ? data.refreshToken : existing?.refreshToken,
+      orgId: data.orgId !== undefined ? data.orgId : existing?.orgId,
+      defaultDepartmentId: data.defaultDepartmentId !== undefined ? data.defaultDepartmentId : existing?.defaultDepartmentId,
+      configuredAt: existing?.configuredAt || new Date().toISOString(),
+      lastTokenRefresh: data.refreshToken ? new Date().toISOString() : existing?.lastTokenRefresh,
+    };
+
+    const jsonContent = JSON.stringify(merged, null, 2);
+    await fs.writeFile(configPath, jsonContent, 'utf-8');
+
+    if (process.platform !== 'win32') {
+      try {
+        await fs.chmod(configPath, 0o600);
+      } catch (err: any) {
+        // Filesystems sin soporte de permisos POSIX (NTFS, FAT, redes) lanzan
+        // EPERM/ENOTSUP. Otros errores indican un problema real (disco lleno,
+        // permisos del directorio, etc) y deben ser visibles.
+        if (err?.code !== 'EPERM' && err?.code !== 'ENOTSUP' && err?.code !== 'EINVAL') {
+          console.error(`[SecureStorage] WARNING: chmod failed: ${err.message}`);
+        }
+      }
     }
-  }
 
-  console.error(`[SecureStorage] Config saved to: ${configPath}`);
+    console.error(`[SecureStorage] Config saved to: ${configPath}`);
+  } finally {
+    release();
+  }
 }
 
 export async function loadConfig(): Promise<SecureConfig | null> {
