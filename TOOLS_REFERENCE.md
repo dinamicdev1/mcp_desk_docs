@@ -82,7 +82,7 @@ Lista las organizaciones accesibles con el token actual.
 
 ---
 
-## Artículos (21 herramientas)
+## Artículos (20 herramientas)
 
 ### list_articles
 
@@ -108,21 +108,6 @@ Obtiene detalles completos de un artículo.
 | Parámetro | Tipo | Requerido | Descripción |
 |-----------|------|-----------|-------------|
 | `article_id` | string | ✅ | ID del artículo |
-
----
-
-### search_articles
-
-Busca artículos por texto.
-
-**Parámetros:**
-| Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
-| `search_str` | string | ✅ | Texto a buscar |
-| `from` | number | ❌ | Índice de inicio (min: 1) |
-| `limit` | number | ❌ | Cantidad a obtener |
-| `category_id` | string | ❌ | Filtrar por categoría |
-| `status` | string | ❌ | Filtrar por estado |
 
 ---
 
@@ -438,23 +423,9 @@ Obtiene el árbol completo de una categoría raíz (con subcategorías y seccion
 
 ---
 
-## Secciones (5 herramientas)
+## Secciones (4 herramientas)
 
-> Las secciones usan endpoints planos `/kbSections`. `list_sections` recibe `category_id`; `get_section`, `update_section` y `move_section_to_trash` reciben solo `section_id`.
-
-### list_sections
-
-Lista las secciones de una categoría.
-
-**Parámetros:**
-| Parámetro | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
-| `category_id` | string | ✅ | ID de la categoría |
-| `from` | number | ❌ | Índice de inicio (min: 1) |
-| `limit` | number | ❌ | Cantidad a obtener |
-| `is_trashed` | boolean | ❌ | Filtrar por estado de papelera |
-
----
+> Las secciones usan endpoints planos `/kbSections`. No existe endpoint de listado independiente (GET /kbSections devuelve 405 METHOD_NOT_ALLOWED). Las secciones se obtienen embebidas en el árbol via `get_category_tree`. `get_section`, `update_section` y `move_section_to_trash` reciben solo `section_id`.
 
 ### get_section
 

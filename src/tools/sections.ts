@@ -1,6 +1,5 @@
 import type { ZohoDeskAPI } from '../client/index.js';
 import {
-  listSectionsSchema,
   getSectionSchema,
   createSectionSchema,
   updateSectionSchema,
@@ -14,22 +13,6 @@ export function createSectionTools(api: ZohoDeskAPI) {
     // ============================================
     // CRUD BÁSICO
     // ============================================
-
-    list_sections: {
-      description: 'Lista las secciones de una categoria.',
-      parameters: listSectionsSchema,
-      execute: async (args: any) => {
-        await resolveToken(api, args.refresh_token);
-        await resolveOrgId(api, args.org_id);
-
-        const sections = await api.sections.listSections(args.category_id, {
-          from: args.from,
-          limit: args.limit,
-          isTrashed: args.is_trashed,
-        });
-        return toolResult(sections);
-      },
-    },
 
     get_section: {
       description: 'Obtiene una seccion por su ID.',

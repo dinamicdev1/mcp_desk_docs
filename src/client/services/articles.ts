@@ -46,25 +46,6 @@ export class ArticlesService {
   }
 
   /**
-   * Busca artículos por texto (usando el endpoint de búsqueda de KB)
-   * GET /api/v1/articles/search
-   */
-  async searchArticles(searchStr: string, params: ArticleSearchParams = {}): Promise<ZohoDeskArticle[]> {
-    const queryParams: Record<string, any> = {
-      searchStr,
-    };
-
-    if (params.from !== undefined) queryParams.from = params.from;
-    if (params.limit !== undefined) queryParams.limit = params.limit;
-    if (params.categoryId) queryParams.categoryId = params.categoryId;
-    if (params.departmentId) queryParams.departmentId = params.departmentId;
-    if (params.status) queryParams.status = params.status;
-
-    const response = await this._client.getList<ZohoDeskArticle>('/articles/search', queryParams);
-    return response.data || [];
-  }
-
-  /**
    * Crea un nuevo artículo
    * POST /api/v1/articles
    */

@@ -2,7 +2,6 @@ import type { ZohoDeskAPI } from '../client/index.js';
 import {
   listArticlesSchema,
   getArticleSchema,
-  searchArticlesSchema,
   createArticleSchema,
   updateArticleSchema,
   moveToTrashSchema,
@@ -62,23 +61,6 @@ export function createArticleTools(api: ZohoDeskAPI) {
         await resolveOrgId(api, args.org_id);
         const article = await api.articles.getArticle(args.article_id);
         return toolResult(article);
-      },
-    },
-
-    search_articles: {
-      description: 'Busca artículos en la base de conocimientos por texto.',
-      parameters: searchArticlesSchema,
-      execute: async (args: any) => {
-        await resolveToken(api, args.refresh_token);
-        await resolveOrgId(api, args.org_id);
-        const articles = await api.articles.searchArticles(args.search_str, {
-          from: args.from,
-          limit: args.limit,
-          categoryId: args.category_id,
-          departmentId: args.department_id,
-          status: args.status,
-        });
-        return toolResult(articles);
       },
     },
 

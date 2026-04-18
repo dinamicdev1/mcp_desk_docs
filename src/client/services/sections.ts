@@ -3,29 +3,10 @@ import type {
   ZohoDeskSection,
   CreateSectionDTO,
   UpdateSectionDTO,
-  SectionSearchParams,
 } from '../../types/index.js';
 
 export class SectionsService {
   constructor(private _client: ZohoDeskClient) {}
-
-  /**
-   * Lista secciones filtrando por category.
-   * GET /api/v1/kbSections?categoryId={categoryId}
-   */
-  async listSections(
-    categoryId: string,
-    params: SectionSearchParams = {}
-  ): Promise<ZohoDeskSection[]> {
-    const queryParams: Record<string, any> = { categoryId };
-
-    if (params.from !== undefined) queryParams.from = params.from;
-    if (params.limit !== undefined) queryParams.limit = params.limit;
-    if (params.isTrashed !== undefined) queryParams.isTrashed = params.isTrashed;
-
-    const response = await this._client.getList<ZohoDeskSection>('/kbSections', queryParams);
-    return response.data || [];
-  }
 
   /**
    * Obtiene una seccion por su ID.

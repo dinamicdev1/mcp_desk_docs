@@ -99,13 +99,12 @@ Con `.env` configurado, ejecuta `npm run oauth` para obtener el refresh token v�
 |-------------|-------------|
 | `list_organizations` | Lista las organizaciones accesibles con el token actual |
 
-### Artículos (21)
+### Artículos (20)
 
 | Herramienta | Descripción |
 |-------------|-------------|
-| `list_articles` | Lista artículos con filtros |
+| `list_articles` | Lista artículos con filtros (acepta `category_id` para filtrar) |
 | `get_article` | Obtiene detalles de un artículo |
-| `search_articles` | Busca artículos por texto |
 | `create_article` | Crea un nuevo artículo |
 | `update_article` | Actualiza un artículo existente |
 | `delete_article` | Mueve artículo a papelera |
@@ -138,11 +137,12 @@ Con `.env` configurado, ejecuta `npm run oauth` para obtener el refresh token v�
 | `delete_root_category` | Mueve categoría raíz a papelera |
 | `get_category_tree` | Obtiene árbol completo de una categoría raíz (`root_category_id`) |
 
-### Secciones (5)
+### Secciones (4)
+
+> Las secciones se obtienen embebidas en el árbol via `get_category_tree`. No existe endpoint de listado independiente (GET /kbSections devuelve 405).
 
 | Herramienta | Descripción |
 |-------------|-------------|
-| `list_sections` | Lista secciones de una categoría (`category_id`, no `root_category_id`) |
 | `get_section` | Obtiene detalles de sección (`section_id` únicamente) |
 | `create_section` | Crea nueva sección en una categoría (`category_id`) |
 | `update_section` | Actualiza sección (`section_id` únicamente) |
@@ -177,10 +177,10 @@ create_article(
 )
 ```
 
-### Buscar Artículos
+### Filtrar Artículos por Categoría
 
 ```
-search_articles(search_term="facturación")
+list_articles(category_id="123456789")
 ```
 
 ### Organizar Contenido

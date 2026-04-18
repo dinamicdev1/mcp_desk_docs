@@ -37,17 +37,6 @@ export const getArticleSchema = baseSchema.merge(
   })
 );
 
-export const searchArticlesSchema = baseSchema.merge(
-  z.object({
-    search_str: z.string().describe('Search query string'),
-    from: z.number().min(1).default(1).describe('Starting index for pagination (min: 1)'),
-    limit: z.number().default(50).describe('Number of articles to retrieve (max 100)'),
-    category_id: z.string().optional().describe('Filter by category ID'),
-    department_id: z.string().optional().describe('Filter by department ID'),
-    status: articleStatusEnum.optional().describe('Filter by article status'),
-  })
-);
-
 export const createArticleSchema = baseSchema.merge(
   z.object({
     title: z.string().describe('Article title'),
@@ -268,15 +257,6 @@ export const getCategoryTreeSchema = baseSchema.merge(
 // ============================================
 // SECTION SCHEMAS
 // ============================================
-
-export const listSectionsSchema = baseSchema.merge(
-  z.object({
-    category_id: z.string().describe('Category ID to list sections for'),
-    from: z.number().min(1).default(1).describe('Starting index for pagination (min: 1)'),
-    limit: z.number().default(50).describe('Number of sections to retrieve'),
-    is_trashed: z.boolean().optional().describe('Filter by trashed state'),
-  })
-);
 
 export const getSectionSchema = baseSchema.merge(
   z.object({

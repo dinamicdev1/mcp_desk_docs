@@ -6,7 +6,7 @@
  * - Haber ejecutado zoho_setup + zoho_connect previamente (via MCP o CLI),
  *   o tener ZOHO_CLIENT_ID/SECRET/REFRESH_TOKEN en .env.
  *
- * Ejecuta 8 checks encadenados que descubren datos reales en runtime.
+ * Ejecuta 6 checks encadenados que descubren datos reales en runtime.
  * Exit code 0 si todas pasan, 1 si alguna falla.
  */
 
@@ -27,7 +27,7 @@ async function runCheck(name, fn) {
 }
 
 async function main() {
-  console.error('=== mcp_desk_docs smoke test (expandido) ===\n');
+  console.error('=== mcp_desk_docs smoke test (6 checks) ===\n');
 
   const config = await loadConfig();
   const api = new ZohoDeskAPI(config);
@@ -79,17 +79,8 @@ async function main() {
   });
   if (!r4.ok) failures.push(r4);
 
-  // 5. Search articles
-  const r5 = await runCheck('search_articles', async () => {
-    const r = await callTool('search_articles', { search_str: 'test', from: 1, limit: 1 });
-    const parsed = JSON.parse(r.content[0].text);
-    const ok = Array.isArray(parsed) || (parsed && 'data' in parsed);
-    if (!ok) throw new Error('Esperaba array o {data: [...]}');
-  });
-  if (!r5.ok) failures.push(r5);
-
-  // 6. List root categories
-  const r6 = await runCheck('list_root_categories', async () => {
+  // 5. List root categories
+  const r5 = await runCheck('list_root_categories', async () => {
     const r = await callTool('list_root_categories', { from: 1, limit: 5 });
     const parsed = JSON.parse(r.content[0].text);
     const arr = Array.isArray(parsed) ? parsed : parsed.data;
@@ -97,39 +88,31 @@ async function main() {
     state.firstRootCategoryId = arr[0]?.id;
     state.hasRootCategories = arr.length > 0;
   });
-  if (!r6.ok) failures.push(r6);
+  if (!r5.ok) failures.push(r5);
 
-  // 7. Get category tree (depende de step 6)
-  const r7 = await runCheck('get_category_tree', async () => {
+  // 6. Get category tree (depende de step 5)
+  // Las secciones se obtienen embebidas en el arbol — no existe GET /kbSections (405).
+  const r6 = await runCheck('get_category_tree', async () => {
     if (!state.firstRootCategoryId) {
       throw new Error('SKIP: no hay root categories en la org de prueba');
     }
     const r = await callTool('get_category_tree', { root_category_id: state.firstRootCategoryId });
     const data = JSON.parse(r.content[0].text);
     if (!data) throw new Error('Respuesta vacia');
-    // Guardar primera categoria hija si existe para paso 8
-    const childCategories = data.childCategories || data.categories;
-    if (Array.isArray(childCategories) && childCategories.length > 0) {
-      state.firstChildCategoryId = childCategories[0].id;
+    // Validar estructura del arbol
+    const childCategories = data.childCategories || data.categories || [];
+    if (!Array.isArray(childCategories)) throw new Error('childCategories debe ser un array');
+    // Si hay categorias hijas, verificar que las secciones vengan embebidas (si existen)
+    for (const child of childCategories) {
+      if (child.sections !== undefined && !Array.isArray(child.sections)) {
+        throw new Error(`child.sections debe ser un array, recibido: ${typeof child.sections}`);
+      }
     }
   });
-  if (!r7.ok) failures.push(r7);
+  if (!r6.ok) failures.push(r6);
 
-  // 8. List sections (depende de step 7)
-  const r8 = await runCheck('list_sections', async () => {
-    const categoryId = state.firstChildCategoryId || state.firstRootCategoryId;
-    if (!categoryId) {
-      throw new Error('SKIP: no hay categoria para listar secciones');
-    }
-    const r = await callTool('list_sections', { category_id: categoryId, from: 1, limit: 1 });
-    const parsed = JSON.parse(r.content[0].text);
-    const ok = Array.isArray(parsed) || (parsed && 'data' in parsed);
-    if (!ok) throw new Error('Esperaba array o {data:[...]}');
-  });
-  if (!r8.ok) failures.push(r8);
-
-  const passed = 8 - failures.length;
-  console.error(`\n=== Resultado: ${passed} OK, ${failures.length} FAIL ===`);
+  const passed = 6 - failures.length;
+  console.error(`\n=== Resultado: ${passed}/6 OK, ${failures.length} FAIL ===`);
 
   if (failures.length > 0) {
     console.error('\nFallas:');
