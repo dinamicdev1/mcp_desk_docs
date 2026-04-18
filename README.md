@@ -99,7 +99,7 @@ Con `.env` configurado, ejecuta `npm run oauth` para obtener el refresh token v�
 |-------------|-------------|
 | `list_organizations` | Lista las organizaciones accesibles con el token actual |
 
-### Artículos (18)
+### Artículos (21)
 
 | Herramienta | Descripción |
 |-------------|-------------|
