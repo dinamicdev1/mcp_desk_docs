@@ -1,0 +1,65 @@
+{
+  "name": "mcp_desk_docs",
+  "version": "1.0.0",
+  "description": "MCP Server for Zoho Desk Knowledge Base - Manage articles, categories and sections",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "mcp-desk-docs": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "oauth": "tsx src/oauth-cli.ts",
+    "oauth:manual": "tsx src/oauth-cli.ts manual",
+    "oauth:exchange": "tsx src/oauth-cli.ts exchange",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "smoke": "npm run build && node scripts/smoke-test.mjs",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dinamicapps/mcp_desk_docs.git"
+  },
+  "keywords": [
+    "mcp",
+    "zoho",
+    "desk",
+    "knowledge-base",
+    "documentation",
+    "model-context-protocol",
+    "articles",
+    "helpdesk"
+  ],
+  "author": "DinamicApps",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dinamicapps/mcp_desk_docs/issues"
+  },
+  "homepage": "https://github.com/dinamicapps/mcp_desk_docs#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.22.0",
+    "axios": "^1.13.2",
+    "dotenv": "^16.4.7",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.47.0",
+    "@typescript-eslint/parser": "^8.47.0",
+    "@vitest/ui": "^4.0.10",
+    "eslint": "^9.39.1",
+    "nodemon": "^3.1.11",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.10"
+  }
+}
