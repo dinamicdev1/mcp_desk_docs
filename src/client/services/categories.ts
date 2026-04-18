@@ -82,10 +82,10 @@ export class CategoriesService {
   // ============================================
 
   /**
-   * Obtiene el árbol de una categoría (con secciones y subcategorías)
-   * GET /api/v1/categories/{categoryId}/tree
+   * Obtiene el arbol de una categoria raiz (con secciones y subcategorias)
+   * GET /api/v1/kbRootCategories/{rootCategoryId}/categoryTree
    */
-  async getCategoryTree(categoryId: string): Promise<ZohoDeskCategoryTree> {
-    return this._client.get<ZohoDeskCategoryTree>(`/categories/${categoryId}/tree`);
+  async getCategoryTree(rootCategoryId: string): Promise<ZohoDeskCategoryTree> {
+    return this._client.get<ZohoDeskCategoryTree>(`/kbRootCategories/${rootCategoryId}/categoryTree`);
   }
 }
