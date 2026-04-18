@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Claude Code - Solo archivos locales (settings personales)
+# NOTA: .claude/CLAUDE.md y otros .md SÍ se commitean (docs del proyecto)
+.claude/settings.local.json
+.claude/*.local.*
+
+# Editor directories
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Vestigio del sistema viejo (reemplazado por secure-storage en %APPDATA%)
+.zoho-desk-token
+.zoho-token
