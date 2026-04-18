@@ -172,20 +172,20 @@ export class ArticlesService {
   // ============================================
 
   /**
-   * Lista versiones de un artículo
-   * GET /api/v1/articles/{articleId}/versions
+   * Lista entradas del historial de un articulo.
+   * GET /api/v1/articles/{articleId}/history
    */
-  async listVersions(articleId: string): Promise<ZohoDeskArticleVersion[]> {
-    const response = await this._client.getList<ZohoDeskArticleVersion>(`/articles/${articleId}/versions`);
+  async listArticleHistory(articleId: string): Promise<ZohoDeskArticleVersion[]> {
+    const response = await this._client.getList<ZohoDeskArticleVersion>(`/articles/${articleId}/history`);
     return response.data || [];
   }
 
   /**
-   * Obtiene una versión específica de un artículo
-   * GET /api/v1/articles/{articleId}/versions/{version}
+   * Obtiene una entrada especifica del historial.
+   * GET /api/v1/articles/{articleId}/history/{entryId}
    */
-  async getVersion(articleId: string, version: number): Promise<ZohoDeskArticleVersion> {
-    return this._client.get<ZohoDeskArticleVersion>(`/articles/${articleId}/versions/${version}`);
+  async getHistoryEntry(articleId: string, entryId: string): Promise<ZohoDeskArticleVersion> {
+    return this._client.get<ZohoDeskArticleVersion>(`/articles/${articleId}/history/${entryId}`);
   }
 
   // ============================================
@@ -202,11 +202,11 @@ export class ArticlesService {
   }
 
   /**
-   * Obtiene una traducción específica
-   * GET /api/v1/articles/{articleId}/translations/{translationId}
+   * Obtiene una traduccion por su locale.
+   * GET /api/v1/articles/{articleId}/translations/{locale}
    */
-  async getTranslation(articleId: string, translationId: string): Promise<ZohoDeskTranslation> {
-    return this._client.get<ZohoDeskTranslation>(`/articles/${articleId}/translations/${translationId}`);
+  async getTranslation(articleId: string, locale: string): Promise<ZohoDeskTranslation> {
+    return this._client.get<ZohoDeskTranslation>(`/articles/${articleId}/translations/${locale}`);
   }
 
   /**
@@ -226,25 +226,25 @@ export class ArticlesService {
   }
 
   /**
-   * Actualiza una traducción
-   * PATCH /api/v1/articles/{articleId}/translations/{translationId}
+   * Actualiza una traduccion identificada por locale.
+   * PATCH /api/v1/articles/{articleId}/translations/{locale}
    */
-  async updateTranslation(articleId: string, translationId: string, data: UpdateTranslationDTO): Promise<ZohoDeskTranslation> {
+  async updateTranslation(articleId: string, locale: string, data: UpdateTranslationDTO): Promise<ZohoDeskTranslation> {
     const payload: Record<string, any> = {};
 
     if (data.title) payload.title = data.title;
     if (data.answer) payload.answer = data.answer;
     if (data.status) payload.status = data.status;
 
-    return this._client.patch<ZohoDeskTranslation>(`/articles/${articleId}/translations/${translationId}`, payload);
+    return this._client.patch<ZohoDeskTranslation>(`/articles/${articleId}/translations/${locale}`, payload);
   }
 
   /**
-   * Elimina una traducción
-   * DELETE /api/v1/articles/{articleId}/translations/{translationId}
+   * Mueve una traduccion a la papelera.
+   * POST /api/v1/articles/{articleId}/translations/{locale}/moveToTrash
    */
-  async deleteTranslation(articleId: string, translationId: string): Promise<void> {
-    await this._client.delete(`/articles/${articleId}/translations/${translationId}`);
+  async moveTranslationToTrash(articleId: string, locale: string): Promise<void> {
+    await this._client.post(`/articles/${articleId}/translations/${locale}/moveToTrash`);
   }
 
   // ============================================
