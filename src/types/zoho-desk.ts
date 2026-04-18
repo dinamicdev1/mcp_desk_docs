@@ -142,7 +142,6 @@ export interface ZohoDeskCategory {
   isDeleted?: boolean;
   portalUrl?: string;
   visibility?: 'Agents' | 'All' | 'Logged in Users' | 'Custom access';
-  userPermissions?: CategoryPermission[];
   childCount?: number;
 }
 
@@ -158,12 +157,6 @@ export interface UpdateCategoryDTO {
   description?: string;
   displayOrder?: number;
   visibility?: 'Agents' | 'All' | 'Logged in Users' | 'Custom access';
-}
-
-export interface CategoryPermission {
-  id: string;
-  type: 'Custom' | 'UserGroup';
-  permission: 'FULL_ACCESS' | 'READ';
 }
 
 // Section Types (basado en documentación oficial)
@@ -340,14 +333,6 @@ export interface SectionSearchParams {
   isTrashed?: boolean;
 }
 
-// Related Articles
-export interface RelatedArticle {
-  id: string;
-  title: string;
-  permalink: string;
-  portalUrl?: string;
-}
-
 // Comment Types
 export interface ZohoDeskComment {
   id: string;
@@ -366,36 +351,10 @@ export interface CreateCommentDTO {
   visibility?: string;
 }
 
-// My Articles Response
-export interface MyArticlesResponse {
-  approvals?: ZohoDeskArticle[];
-  drafts?: ZohoDeskArticle[];
-  published?: ZohoDeskArticle[];
-}
-
 // Permalink Check Response
 export interface PermalinkCheckResponse {
   isAvailable: boolean;
   suggestedPermalink?: string;
-}
-
-// Bulk Operations
-export interface BulkMoveDTO {
-  articleIds: string[];
-  categoryId: string;
-  sectionId?: string;
-}
-
-export interface BulkTrashDTO {
-  articleIds: string[];
-}
-
-export interface BulkRestoreDTO {
-  articleIds: string[];
-}
-
-export interface BulkDeleteDTO {
-  articleIds: string[];
 }
 
 // Settings
