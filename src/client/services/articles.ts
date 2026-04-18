@@ -9,9 +9,7 @@ import type {
   UpdateTranslationDTO,
   ZohoDeskAttachment,
   ZohoDeskArticleVersion,
-  RelatedArticle,
   PermalinkCheckResponse,
-  MyArticlesResponse,
 } from '../../types/index.js';
 
 export class ArticlesService {
@@ -252,109 +250,42 @@ export class ArticlesService {
   // ============================================
 
   /**
-   * Lista los adjuntos de un artículo
-   * GET /api/v1/articles/{articleId}/attachments
+   * Lista los adjuntos de una traduccion de articulo.
+   * GET /api/v1/articles/{articleId}/translations/{locale}/attachments
    */
-  async listAttachments(articleId: string): Promise<ZohoDeskAttachment[]> {
-    const response = await this._client.getList<ZohoDeskAttachment>(`/articles/${articleId}/attachments`);
+  async listTranslationAttachments(articleId: string, locale: string): Promise<ZohoDeskAttachment[]> {
+    const response = await this._client.getList<ZohoDeskAttachment>(
+      `/articles/${articleId}/translations/${locale}/attachments`
+    );
     return response.data || [];
   }
 
   /**
-   * Elimina un adjunto
-   * DELETE /api/v1/articles/{articleId}/attachments/{attachmentId}
+   * Desasocia (quita) uno o mas adjuntos de una traduccion de articulo.
+   * POST /api/v1/articles/{articleId}/translations/{locale}/dissociateAttachments
+   * Body: {attachmentIds: [...]}
    */
-  async deleteAttachment(articleId: string, attachmentId: string): Promise<void> {
-    await this._client.delete(`/articles/${articleId}/attachments/${attachmentId}`);
-  }
-
-  // ============================================
-  // ARTÍCULOS RELACIONADOS
-  // ============================================
-
-  /**
-   * Lista artículos relacionados
-   * GET /api/v1/articles/{articleId}/relatedArticles
-   */
-  async listRelatedArticles(articleId: string): Promise<RelatedArticle[]> {
-    const response = await this._client.getList<RelatedArticle>(`/articles/${articleId}/relatedArticles`);
-    return response.data || [];
+  async dissociateAttachments(articleId: string, locale: string, attachmentIds: string[]): Promise<void> {
+    await this._client.post(
+      `/articles/${articleId}/translations/${locale}/dissociateAttachments`,
+      { attachmentIds }
+    );
   }
 
   /**
-   * Asocia artículos relacionados
-   * POST /api/v1/articles/{articleId}/relatedArticles
+   * Registra like en una traduccion de articulo.
+   * POST /api/v1/articles/{articleId}/translations/{locale}/like
    */
-  async addRelatedArticles(articleId: string, relatedArticleIds: string[]): Promise<void> {
-    await this._client.post(`/articles/${articleId}/relatedArticles`, {
-      relatedArticleIds,
-    });
+  async likeArticle(articleId: string, locale: string): Promise<void> {
+    await this._client.post(`/articles/${articleId}/translations/${locale}/like`);
   }
 
   /**
-   * Elimina un artículo relacionado
-   * DELETE /api/v1/articles/{articleId}/relatedArticles/{relatedArticleId}
+   * Registra dislike en una traduccion de articulo.
+   * POST /api/v1/articles/{articleId}/translations/{locale}/dislike
    */
-  async removeRelatedArticle(articleId: string, relatedArticleId: string): Promise<void> {
-    await this._client.delete(`/articles/${articleId}/relatedArticles/${relatedArticleId}`);
+  async dislikeArticle(articleId: string, locale: string): Promise<void> {
+    await this._client.post(`/articles/${articleId}/translations/${locale}/dislike`);
   }
 
-  // ============================================
-  // TAGS
-  // ============================================
-
-  /**
-   * Lista tags de un artículo
-   * GET /api/v1/articles/{articleId}/tags
-   */
-  async listTags(articleId: string): Promise<string[]> {
-    const response = await this._client.get<{ tags: string[] }>(`/articles/${articleId}/tags`);
-    return response.tags || [];
-  }
-
-  /**
-   * Actualiza tags de un artículo
-   * POST /api/v1/articles/{articleId}/tags
-   */
-  async updateTags(articleId: string, tags: string[]): Promise<void> {
-    await this._client.post(`/articles/${articleId}/tags`, { tags });
-  }
-
-  // ============================================
-  // CONTADORES Y FEEDBACK
-  // ============================================
-
-  /**
-   * Incrementa el contador de vistas
-   * POST /api/v1/articles/{articleId}/markAsViewed
-   */
-  async markAsViewed(articleId: string): Promise<void> {
-    await this._client.post(`/articles/${articleId}/markAsViewed`);
-  }
-
-  /**
-   * Registra like en un artículo
-   * POST /api/v1/articles/{articleId}/like
-   */
-  async likeArticle(articleId: string): Promise<void> {
-    await this._client.post(`/articles/${articleId}/like`);
-  }
-
-  /**
-   * Registra dislike en un artículo
-   * POST /api/v1/articles/{articleId}/dislike
-   */
-  async dislikeArticle(articleId: string): Promise<void> {
-    await this._client.post(`/articles/${articleId}/dislike`);
-  }
-
-  /**
-   * Marca artículo como usado (para tickets)
-   * POST /api/v1/articles/{articleId}/markAsUsed
-   */
-  async markAsUsed(articleId: string, ticketId?: string): Promise<void> {
-    const payload: Record<string, any> = {};
-    if (ticketId) payload.ticketId = ticketId;
-    await this._client.post(`/articles/${articleId}/markAsUsed`, payload);
-  }
 }
