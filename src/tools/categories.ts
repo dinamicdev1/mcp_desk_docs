@@ -78,9 +78,8 @@ export function createCategoryTools(api: ZohoDeskAPI) {
       },
     },
 
-    delete_root_category: {
-      description:
-        'Mueve una categoría raíz a la papelera. ADVERTENCIA: Esto también afectará todas las categorías hijas, secciones y artículos.',
+    move_root_category_to_trash: {
+      description: 'Mueve una categoria raiz a la papelera.',
       parameters: deleteRootCategorySchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
