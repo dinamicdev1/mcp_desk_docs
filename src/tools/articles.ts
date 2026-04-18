@@ -8,22 +8,18 @@ import {
   moveToTrashSchema,
   restoreFromTrashSchema,
   deleteArticlesSchema,
-  moveArticlesSchema,
   checkPermalinkSchema,
   listTrashedArticlesSchema,
-  listVersionsSchema,
-  getVersionSchema,
+  listArticleHistorySchema,
+  getHistoryEntrySchema,
   listTranslationsSchema,
   createTranslationSchema,
   updateTranslationSchema,
-  deleteTranslationSchema,
-  listAttachmentsSchema,
-  deleteAttachmentSchema,
-  listRelatedArticlesSchema,
-  addRelatedArticlesSchema,
-  removeRelatedArticleSchema,
+  getTranslationSchema,
+  moveTranslationToTrashSchema,
+  listTranslationAttachmentsSchema,
+  dissociateAttachmentsSchema,
   articleFeedbackSchema,
-  baseSchema,
 } from '../utils/schemas.js';
 import { resolveToken, resolveOrgId, toolResult } from './_helpers.js';
 
@@ -155,7 +151,7 @@ export function createArticleTools(api: ZohoDeskAPI) {
         await resolveOrgId(api, args.org_id);
         await api.articles.moveToTrash(args.article_ids);
         return {
-          content: [{ type: 'text' as const, text: `✅ ${args.article_ids.length} article(s) moved to trash.` }],
+          content: [{ type: 'text' as const, text: `${args.article_ids.length} article(s) moved to trash.` }],
         };
       },
     },
@@ -168,7 +164,7 @@ export function createArticleTools(api: ZohoDeskAPI) {
         await resolveOrgId(api, args.org_id);
         await api.articles.restoreFromTrash(args.article_ids);
         return {
-          content: [{ type: 'text' as const, text: `✅ ${args.article_ids.length} article(s) restored from trash.` }],
+          content: [{ type: 'text' as const, text: `${args.article_ids.length} article(s) restored from trash.` }],
         };
       },
     },
@@ -181,7 +177,7 @@ export function createArticleTools(api: ZohoDeskAPI) {
         await resolveOrgId(api, args.org_id);
         await api.articles.deleteArticles(args.article_ids);
         return {
-          content: [{ type: 'text' as const, text: `✅ ${args.article_ids.length} article(s) permanently deleted.` }],
+          content: [{ type: 'text' as const, text: `${args.article_ids.length} article(s) permanently deleted.` }],
         };
       },
     },
@@ -200,23 +196,6 @@ export function createArticleTools(api: ZohoDeskAPI) {
       },
     },
 
-    // ============================================
-    // MOVER Y ORGANIZAR
-    // ============================================
-
-    move_articles: {
-      description: 'Mueve uno o más artículos a otra categoría/sección.',
-      parameters: moveArticlesSchema,
-      execute: async (args: any) => {
-        await resolveToken(api, args.refresh_token);
-        await resolveOrgId(api, args.org_id);
-        await api.articles.moveArticles(args.article_ids, args.category_id, args.section_id);
-        return {
-          content: [{ type: 'text' as const, text: `✅ ${args.article_ids.length} article(s) moved.` }],
-        };
-      },
-    },
-
     check_permalink: {
       description: 'Verifica si un permalink está disponible.',
       parameters: checkPermalinkSchema,
@@ -228,40 +207,31 @@ export function createArticleTools(api: ZohoDeskAPI) {
       },
     },
 
-    get_my_articles: {
-      description: 'Obtiene mis artículos (drafts, approvals, published).',
-      parameters: baseSchema,
+    // ============================================
+    // HISTORIAL
+    // ============================================
+
+    list_article_history: {
+      description: 'Lista el historial de cambios de un articulo.',
+      parameters: listArticleHistorySchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
         await resolveOrgId(api, args.org_id);
-        const result = await api.articles.getMyArticles();
-        return toolResult(result);
+
+        const history = await api.articles.listArticleHistory(args.article_id);
+        return toolResult(history);
       },
     },
 
-    // ============================================
-    // VERSIONES
-    // ============================================
-
-    list_article_versions: {
-      description: 'Lista todas las versiones de un artículo.',
-      parameters: listVersionsSchema,
+    get_history_entry: {
+      description: 'Obtiene una entrada especifica del historial de un articulo.',
+      parameters: getHistoryEntrySchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
         await resolveOrgId(api, args.org_id);
-        const versions = await api.articles.listVersions(args.article_id);
-        return toolResult(versions);
-      },
-    },
 
-    get_article_version: {
-      description: 'Obtiene una versión específica de un artículo.',
-      parameters: getVersionSchema,
-      execute: async (args: any) => {
-        await resolveToken(api, args.refresh_token);
-        await resolveOrgId(api, args.org_id);
-        const version = await api.articles.getVersion(args.article_id, args.version);
-        return toolResult(version);
+        const entry = await api.articles.getHistoryEntry(args.article_id, args.entry_id);
+        return toolResult(entry);
       },
     },
 
@@ -277,6 +247,18 @@ export function createArticleTools(api: ZohoDeskAPI) {
         await resolveOrgId(api, args.org_id);
         const translations = await api.articles.listTranslations(args.article_id);
         return toolResult(translations);
+      },
+    },
+
+    get_article_translation: {
+      description: 'Obtiene una traduccion especifica de un articulo por su locale.',
+      parameters: getTranslationSchema,
+      execute: async (args: any) => {
+        await resolveToken(api, args.refresh_token);
+        await resolveOrgId(api, args.org_id);
+
+        const translation = await api.articles.getTranslation(args.article_id, args.locale);
+        return toolResult(translation);
       },
     },
 
@@ -297,30 +279,29 @@ export function createArticleTools(api: ZohoDeskAPI) {
     },
 
     update_article_translation: {
-      description: 'Actualiza una traducción existente.',
+      description: 'Actualiza una traduccion existente (identificada por locale).',
       parameters: updateTranslationSchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
         await resolveOrgId(api, args.org_id);
-        const translation = await api.articles.updateTranslation(args.article_id, args.translation_id, {
-          title: args.title,
-          answer: args.answer,
-          status: args.status,
-        });
+        const translation = await api.articles.updateTranslation(
+          args.article_id,
+          args.locale,
+          { title: args.title, answer: args.answer, status: args.status }
+        );
         return toolResult(translation);
       },
     },
 
-    delete_article_translation: {
-      description: 'Elimina una traducción.',
-      parameters: deleteTranslationSchema,
+    move_article_translation_to_trash: {
+      description: 'Mueve una traduccion a la papelera (identificada por locale).',
+      parameters: moveTranslationToTrashSchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
         await resolveOrgId(api, args.org_id);
-        await api.articles.deleteTranslation(args.article_id, args.translation_id);
-        return {
-          content: [{ type: 'text' as const, text: `✅ Translation deleted.` }],
-        };
+
+        await api.articles.moveTranslationToTrash(args.article_id, args.locale);
+        return toolResult({ success: true, message: 'Translation moved to trash' });
       },
     },
 
@@ -328,111 +309,59 @@ export function createArticleTools(api: ZohoDeskAPI) {
     // ADJUNTOS
     // ============================================
 
-    list_article_attachments: {
-      description: 'Lista todos los archivos adjuntos de un artículo.',
-      parameters: listAttachmentsSchema,
+    list_article_translation_attachments: {
+      description: 'Lista los adjuntos de una traduccion de articulo.',
+      parameters: listTranslationAttachmentsSchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
         await resolveOrgId(api, args.org_id);
-        const attachments = await api.articles.listAttachments(args.article_id);
+
+        const attachments = await api.articles.listTranslationAttachments(args.article_id, args.locale);
         return toolResult(attachments);
       },
     },
 
-    delete_article_attachment: {
-      description: 'Elimina un archivo adjunto de un artículo.',
-      parameters: deleteAttachmentSchema,
+    dissociate_article_attachments: {
+      description: 'Desasocia uno o mas adjuntos de una traduccion de articulo.',
+      parameters: dissociateAttachmentsSchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
         await resolveOrgId(api, args.org_id);
-        await api.articles.deleteAttachment(args.article_id, args.attachment_id);
-        return {
-          content: [{ type: 'text' as const, text: `✅ Attachment deleted.` }],
-        };
+
+        await api.articles.dissociateAttachments(
+          args.article_id,
+          args.locale,
+          args.attachment_ids
+        );
+        return toolResult({ success: true, count: args.attachment_ids.length });
       },
     },
 
     // ============================================
-    // ARTÍCULOS RELACIONADOS
-    // ============================================
-
-    list_related_articles: {
-      description: 'Lista los artículos relacionados de un artículo.',
-      parameters: listRelatedArticlesSchema,
-      execute: async (args: any) => {
-        await resolveToken(api, args.refresh_token);
-        await resolveOrgId(api, args.org_id);
-        const related = await api.articles.listRelatedArticles(args.article_id);
-        return toolResult(related);
-      },
-    },
-
-    add_related_articles: {
-      description: 'Asocia artículos relacionados a un artículo.',
-      parameters: addRelatedArticlesSchema,
-      execute: async (args: any) => {
-        await resolveToken(api, args.refresh_token);
-        await resolveOrgId(api, args.org_id);
-        await api.articles.addRelatedArticles(args.article_id, args.related_article_ids);
-        return {
-          content: [{ type: 'text' as const, text: `✅ ${args.related_article_ids.length} related article(s) added.` }],
-        };
-      },
-    },
-
-    remove_related_article: {
-      description: 'Elimina la relación con un artículo.',
-      parameters: removeRelatedArticleSchema,
-      execute: async (args: any) => {
-        await resolveToken(api, args.refresh_token);
-        await resolveOrgId(api, args.org_id);
-        await api.articles.removeRelatedArticle(args.article_id, args.related_article_id);
-        return {
-          content: [{ type: 'text' as const, text: `✅ Related article removed.` }],
-        };
-      },
-    },
-
-    // ============================================
-    // FEEDBACK Y CONTADORES
+    // FEEDBACK
     // ============================================
 
     like_article: {
-      description: 'Registra un like en un artículo.',
+      description: 'Registra like en una traduccion de articulo (requiere locale).',
       parameters: articleFeedbackSchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
         await resolveOrgId(api, args.org_id);
-        await api.articles.likeArticle(args.article_id);
-        return {
-          content: [{ type: 'text' as const, text: `✅ Article liked.` }],
-        };
+
+        await api.articles.likeArticle(args.article_id, args.locale);
+        return toolResult({ success: true });
       },
     },
 
     dislike_article: {
-      description: 'Registra un dislike en un artículo.',
+      description: 'Registra dislike en una traduccion de articulo (requiere locale).',
       parameters: articleFeedbackSchema,
       execute: async (args: any) => {
         await resolveToken(api, args.refresh_token);
         await resolveOrgId(api, args.org_id);
-        await api.articles.dislikeArticle(args.article_id);
-        return {
-          content: [{ type: 'text' as const, text: `✅ Article disliked.` }],
-        };
-      },
-    },
 
-    mark_article_as_viewed: {
-      description: 'Incrementa el contador de vistas de un artículo.',
-      parameters: articleFeedbackSchema,
-      execute: async (args: any) => {
-        await resolveToken(api, args.refresh_token);
-        await resolveOrgId(api, args.org_id);
-        await api.articles.markAsViewed(args.article_id);
-        return {
-          content: [{ type: 'text' as const, text: `✅ Article marked as viewed.` }],
-        };
+        await api.articles.dislikeArticle(args.article_id, args.locale);
+        return toolResult({ success: true });
       },
     },
   };
