@@ -33,6 +33,22 @@ export class ZohoDeskClient {
         'Content-Type': 'application/json',
       },
       timeout: 30000,
+      // Zoho Desk devuelve algunos IDs numericos largos que pierden precision con
+      // JSON.parse default. Envolvemos enteros >=16 digitos como string antes de parsear.
+      transformResponse: [
+        (data: string) => {
+          if (typeof data !== 'string' || data.length === 0) return data;
+          try {
+            const safe = data.replace(
+              /([:\[,]\s*)(-?\d{16,})(\s*[,\]}])/g,
+              '$1"$2"$3',
+            );
+            return JSON.parse(safe);
+          } catch {
+            try { return JSON.parse(data); } catch { return data; }
+          }
+        },
+      ],
     });
 
     this.setupInterceptors();
@@ -288,42 +304,53 @@ export class ZohoDeskClient {
     return this.config.defaultDepartmentId;
   }
 
-  /**
-   * Establece un nuevo refresh token para usar en las próximas llamadas.
-   * El token se recibe como parámetro de la IA y NO se guarda en disco.
-   */
   setRefreshToken(refreshToken: string): void {
     const tokenLength = refreshToken?.length || 0;
     console.error(`[ZohoDeskClient] setRefreshToken called - length: ${tokenLength} chars`);
 
-    // Validar formato esperado del token de Zoho
     if (tokenLength < 60) {
-      console.error(`[ZohoDeskClient] WARNING: Token appears TRUNCATED!`);
-      console.error(`[ZohoDeskClient] Expected ~69 chars, received ${tokenLength} chars`);
-      console.error(`[ZohoDeskClient] Token received: "${refreshToken}"`);
+      console.error(`[ZohoDeskClient] WARNING: Token appears TRUNCATED (expected ~69 chars, got ${tokenLength})`);
     } else {
-      console.error(`[ZohoDeskClient] Token format OK - preview: ${refreshToken.substring(0, 20)}...${refreshToken.substring(tokenLength - 10)}`);
+      console.error(`[ZohoDeskClient] Token format OK - preview: ${refreshToken.substring(0, 20)}...`);
     }
 
     if (this.config.refreshToken !== refreshToken) {
       this.config.refreshToken = refreshToken;
-      // Invalidar access token para forzar renovación con el nuevo refresh token
       this.accessToken = null;
       this.tokenExpiresAt = 0;
       console.error(`[ZohoDeskClient] Token updated in memory, access token invalidated`);
+
+      saveRefreshToken(refreshToken).catch(err => {
+        console.error(`[ZohoDeskClient] Failed to persist refresh token: ${err.message}`);
+      });
     } else {
       console.error(`[ZohoDeskClient] Token unchanged, skipping update`);
     }
   }
 
-  /**
-   * Establece el org ID para usar en las próximas llamadas.
-   */
   setOrgId(orgId: string): void {
-    if (orgId && orgId.length > 0) {
+    if (orgId && orgId.length > 0 && this.config.orgId !== orgId) {
       this.config.orgId = orgId;
       console.error(`[ZohoDeskClient] Org ID updated: ${orgId}`);
+
+      saveOrgId(orgId).catch(err => {
+        console.error(`[ZohoDeskClient] Failed to persist orgId: ${err.message}`);
+      });
     }
+  }
+
+  getDefaultOrgId(): string | undefined {
+    return this.config.defaultOrgId;
+  }
+
+  setDefaultOrgId(orgId: string): void {
+    this.config.defaultOrgId = orgId;
+    this.config.orgId = orgId;
+    console.error(`[ZohoDeskClient] Default org ID set: ${orgId}`);
+
+    saveOrgId(orgId).catch(err => {
+      console.error(`[ZohoDeskClient] Failed to persist defaultOrgId: ${err.message}`);
+    });
   }
 
   /**
