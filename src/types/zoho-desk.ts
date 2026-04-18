@@ -260,6 +260,20 @@ export interface ZohoDeskDepartment {
   modifiedTime?: string;
 }
 
+// Organization Types
+export interface ZohoDeskOrganization {
+  id: string;
+  companyName: string;
+  portalName?: string;
+  isDefault?: boolean;
+  timeZone?: string;
+  phone?: string;
+  fax?: string;
+  primaryContact?: string;
+  website?: string;
+  primaryEmail?: string;
+}
+
 // User Types
 export interface ZohoDeskUser {
   id: string;
