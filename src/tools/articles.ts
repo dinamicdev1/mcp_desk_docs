@@ -111,9 +111,7 @@ export function createArticleTools(api: ZohoDeskAPI) {
           permalink: args.permalink,
           disableComments: args.disable_comments,
         });
-        return {
-          content: [{ type: 'text' as const, text: `✅ Article created!\n\n${JSON.stringify(article, null, 2)}` }],
-        };
+        return toolResult(article);
       },
     },
 
@@ -141,9 +139,7 @@ export function createArticleTools(api: ZohoDeskAPI) {
           permalink: args.permalink,
           disableComments: args.disable_comments,
         });
-        return {
-          content: [{ type: 'text' as const, text: `✅ Article updated!\n\n${JSON.stringify(article, null, 2)}` }],
-        };
+        return toolResult(article);
       },
     },
 
@@ -296,9 +292,7 @@ export function createArticleTools(api: ZohoDeskAPI) {
           answer: args.answer,
           status: args.status,
         });
-        return {
-          content: [{ type: 'text' as const, text: `✅ Translation created!\n\n${JSON.stringify(translation, null, 2)}` }],
-        };
+        return toolResult(translation);
       },
     },
 
@@ -313,9 +307,7 @@ export function createArticleTools(api: ZohoDeskAPI) {
           answer: args.answer,
           status: args.status,
         });
-        return {
-          content: [{ type: 'text' as const, text: `✅ Translation updated!\n\n${JSON.stringify(translation, null, 2)}` }],
-        };
+        return toolResult(translation);
       },
     },
 

@@ -64,9 +64,7 @@ export function createCategoryTools(api: ZohoDeskAPI) {
           },
           args.department_id
         );
-        return {
-          content: [{ type: 'text' as const, text: `✅ Root category created!\n\n${JSON.stringify(category, null, 2)}` }],
-        };
+        return toolResult(category);
       },
     },
 
@@ -82,9 +80,7 @@ export function createCategoryTools(api: ZohoDeskAPI) {
           displayOrder: args.display_order,
           visibility: args.visibility,
         });
-        return {
-          content: [{ type: 'text' as const, text: `✅ Root category updated!\n\n${JSON.stringify(category, null, 2)}` }],
-        };
+        return toolResult(category);
       },
     },
 
@@ -156,9 +152,7 @@ export function createCategoryTools(api: ZohoDeskAPI) {
           displayOrder: args.display_order,
           visibility: args.visibility,
         });
-        return {
-          content: [{ type: 'text' as const, text: `✅ Category created!\n\n${JSON.stringify(category, null, 2)}` }],
-        };
+        return toolResult(category);
       },
     },
 
@@ -174,9 +168,7 @@ export function createCategoryTools(api: ZohoDeskAPI) {
           displayOrder: args.display_order,
           visibility: args.visibility,
         });
-        return {
-          content: [{ type: 'text' as const, text: `✅ Category updated!\n\n${JSON.stringify(category, null, 2)}` }],
-        };
+        return toolResult(category);
       },
     },
 

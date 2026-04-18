@@ -57,9 +57,7 @@ export function createSectionTools(api: ZohoDeskAPI) {
           displayOrder: args.display_order,
           visibility: args.visibility,
         });
-        return {
-          content: [{ type: 'text' as const, text: `✅ Section created!\n\n${JSON.stringify(section, null, 2)}` }],
-        };
+        return toolResult(section);
       },
     },
 
@@ -80,9 +78,7 @@ export function createSectionTools(api: ZohoDeskAPI) {
             visibility: args.visibility,
           }
         );
-        return {
-          content: [{ type: 'text' as const, text: `✅ Section updated!\n\n${JSON.stringify(section, null, 2)}` }],
-        };
+        return toolResult(section);
       },
     },
 
